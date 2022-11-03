@@ -2,8 +2,12 @@ package me.hhhaiai.adblib;
 
 import android.os.Looper;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Base64;
+
+import me.hhhaiai.utils.Alog;
+import me.hhhaiai.utils.Streams;
+import me.hhhaiai.utils.Texts;
+import me.hhhaiai.utils.ref.ContentHolder;
 
 import java.io.File;
 import java.net.Socket;
@@ -16,11 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import me.hhhaiai.utils.Alog;
-import me.hhhaiai.utils.Streams;
-import me.hhhaiai.utils.Texts;
-import me.hhhaiai.utils.ref.ContentHolder;
 
 public class AdbCommand {
     private static String TAG = "sanbo.Mys";

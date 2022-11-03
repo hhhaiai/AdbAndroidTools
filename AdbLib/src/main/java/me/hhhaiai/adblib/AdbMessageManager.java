@@ -99,7 +99,8 @@ public class AdbMessageManager {
              * terminating cleanup for one failed close(). */
             try {
                 s.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
 
         /* No open streams anymore */

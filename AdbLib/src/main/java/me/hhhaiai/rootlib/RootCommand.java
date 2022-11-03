@@ -2,12 +2,12 @@ package me.hhhaiai.rootlib;
 
 import android.content.Context;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-
 import me.hhhaiai.utils.Alog;
 import me.hhhaiai.utils.Files;
 import me.hhhaiai.utils.Streams;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 public class RootCommand {
     private static Boolean isRoot = null;
