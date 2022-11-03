@@ -1,0 +1,53 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenLocal()
+        mavenCentral()
+        google()
+//        jcenter()
+        maven { url "https://jitpack.io" }
+        // jcenter() { url "http://jcenter.bintray.com/" }
+        maven { url 'https://repo1.maven.org/maven2/' }
+        // central
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
+        // jcenter
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+        // public
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+        //google
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+        //gradle-plugin
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+        //apache snapshots
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+//        jcenter()
+        maven { url "https://jitpack.io" }
+        // jcenter() { url "http://jcenter.bintray.com/" }
+        maven { url 'https://repo1.maven.org/maven2/' }
+        // central
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
+        // jcenter
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+        // public
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+        //google
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+        //gradle-plugin
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+        //apache snapshots
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
+    }
+}
+rootProject.name = "AdbAndroidTools"
+include ':app'
+include ':adblibB'
+include ':adblibA'
+include ':adblibC'
