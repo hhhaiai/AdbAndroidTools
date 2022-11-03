@@ -14,17 +14,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import me.hhhaiai.utils.Alog;
+import me.hhhaiai.utils.Pools;
 import me.hhhaiai.utils.Streams;
 import me.hhhaiai.utils.ref.ContentHolder;
 
 public class AdbCommand {
     private static String TAG = "sanbo.Mys";
     private static ExecutorService cachedExecutor = Executors.newCachedThreadPool();
-    private static List<Process> processes = new ArrayList<>();
+    //    private static List<Process> processes = new ArrayList<>();
     private static volatile AdbConnection connection;
-    private static List<AdbStream> streams = new ArrayList<>();
-
-    private static String mServer = "localhost:5555";
+    private static List<AdbStream> streams = new ArrayList<AdbStream>();
 
     private AdbCommand() {
     }
@@ -116,10 +115,11 @@ public class AdbCommand {
             if (connection != null) {
                 connection.setFine(false);
             }
-            boolean result = generateConnection();
-            if (result) {
-                return retryExecAdb(cmd, wait);
-            }
+//            // 重试部分暂时去除
+//            boolean result = generateConnectionImpl(null);
+//            if (result) {
+//                return retryExecAdb(cmd, wait);
+//            }
 
         }
         return "";
@@ -129,11 +129,30 @@ public class AdbCommand {
     /**
      * 生成Adb连接，由所在文件生成，或创建并保存到相应文件
      * @return
+     * @param callBack
      */
-    public static boolean generateConnection() {
+    public static void generateConnection(IAdbCallBack callBack) {
 
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Pools.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Alog.i(" main thread");
+                    generateConnectionImpl(callBack);
+                }
+            });
+        } else {
+            Alog.i("not main thread");
+            generateConnectionImpl(callBack);
+        }
+    }
+
+    private static boolean generateConnectionImpl(IAdbCallBack callBack) {
         if (connection != null && connection.isFine()) {
             Alog.i(" connection is fine~~");
+            if (callBack != null) {
+                callBack.onSuccess();
+            }
             return true;
         }
         Alog.i(" generateConnection connection:" + connection);
@@ -155,6 +174,7 @@ public class AdbCommand {
         File privKey = new File(ContentHolder.getCacheDir(), "privKey");
         File pubKey = new File(ContentHolder.getCacheDir(), "pubKey");
 
+        Alog.i("privKey path:" + privKey.getAbsolutePath() + "\r\npubKey path:" + pubKey.getAbsolutePath());
         if (!privKey.exists() || !pubKey.exists()) {
             try {
                 Alog.d(" generateConnection privKey & pubKey not exists!");
@@ -164,6 +184,9 @@ public class AdbCommand {
                 crypto.saveAdbKeyPair(privKey, pubKey);
             } catch (Throwable e) {
                 Alog.e(e);
+                if (callBack != null) {
+                    callBack.onError(e);
+                }
                 return false;
             }
         } else {
@@ -178,6 +201,9 @@ public class AdbCommand {
                     crypto.saveAdbKeyPair(privKey, pubKey);
                 } catch (Throwable ew) {
                     Alog.e(ew);
+                    if (callBack != null) {
+                        callBack.onError(ew);
+                    }
                     return false;
                 }
             }
@@ -186,11 +212,13 @@ public class AdbCommand {
         // 开始连接adb
         Alog.i("Socket connecting...");
         try {
-            String[] split = mServer.split(":");
-            sock = new Socket(split[0], Integer.parseInt(split[1]));
+            sock = new Socket(ContentHolder.getAddress(), ContentHolder.getPort());
             sock.setReuseAddress(true);
         } catch (Throwable e) {
             Alog.e(e);
+            if (callBack != null) {
+                callBack.onError(e);
+            }
             return false;
         }
         Alog.i("Socket connected");
@@ -204,24 +232,20 @@ public class AdbCommand {
             conn.connect(10 * 1000);
         } catch (Throwable e) {
             Alog.e(e);
-
             Streams.close(sock);
-            // socket关闭
-            if (sock.isConnected()) {
-                try {
-                    sock.close();
-                } catch (Throwable e1) {
-                    Alog.e(e1);
-                }
+            if (callBack != null) {
+                callBack.onError(e);
             }
             return false;
         }
         connection = conn;
         Alog.i("ADB connected");
-
-//        // ADB成功连接后，开启ADB状态监测, 暂缓该部分处理
+//        //  暂缓该部分处理
+//        // ADB成功连接后，开启ADB状态监测
 //        startAdbStatusCheck();
-
+        if (callBack != null) {
+            callBack.onSuccess();
+        }
         return true;
     }
 
@@ -347,94 +371,95 @@ public class AdbCommand {
 //        }
 //    }
 
-    /************************************* 尝试系列******************************************/
 
-    private static String retryExecAdb(String cmd, long wait) {
-        AdbStream stream = null;
-        try {
-            stream = connection.open("shell:" + cmd);
-            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
-            streams.add(stream);
-
-            // 当wait为0，每个10ms观察一次stream状况，直到shutdown
-            if (wait == 0) {
-                while (!stream.isClosed()) {
-                    Thread.sleep(10);
-                }
-            } else {
-                // 等待wait毫秒后强制退出
-                long start = System.currentTimeMillis();
-                while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
-                    Thread.sleep(10);
-                }
-                if (!stream.isClosed()) {
-                    stream.close();
-                }
-            }
-
-            // 获取stream所有输出
-            Queue<byte[]> results = stream.getReadQueue();
-            StringBuilder sb = new StringBuilder();
-            for (byte[] bytes : results) {
-                if (bytes != null) {
-                    sb.append(new String(bytes));
-                }
-            }
-            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
-            streams.remove(stream);
-            return sb.toString();
-        } catch (Throwable e) {
-            Alog.e(e);
-        }
-
-        return "";
-    }
-
-
-    private static String execAdbCmdWithStatus(final String cmd, final int wait) {
-        if (connection == null) {
-            Alog.e(new NullPointerException("[execAdbCmdWithStatus] connection is null"));
-            return "";
-        }
-
-        try {
-            AdbStream stream = connection.open("shell:" + cmd);
-            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
-            streams.add(stream);
-
-            // 当wait为0，每个10ms观察一次stream状况，直到shutdown
-            if (wait == 0) {
-                while (!stream.isClosed()) {
-                    Thread.sleep(10);
-                }
-            } else {
-                // 等待wait毫秒后强制退出
-                long start = System.currentTimeMillis();
-                while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
-                    Thread.sleep(10);
-                }
-                if (!stream.isClosed()) {
-                    stream.close();
-                }
-            }
-
-            // 获取stream所有输出
-            Queue<byte[]> results = stream.getReadQueue();
-            StringBuilder sb = new StringBuilder();
-            for (byte[] bytes : results) {
-                if (bytes != null) {
-                    sb.append(new String(bytes));
-                }
-            }
-
-            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
-            streams.remove(stream);
-            return sb.toString();
-        } catch (Throwable e) {
-            Alog.e(e);
-        }
-        return "";
-    }
+//    /************************************* 尝试系列 暂时去除******************************************/
+//
+//    private static String retryExecAdb(String cmd, long wait) {
+//        AdbStream stream = null;
+//        try {
+//            stream = connection.open("shell:" + cmd);
+//            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
+//            streams.add(stream);
+//
+//            // 当wait为0，每个10ms观察一次stream状况，直到shutdown
+//            if (wait == 0) {
+//                while (!stream.isClosed()) {
+//                    Thread.sleep(10);
+//                }
+//            } else {
+//                // 等待wait毫秒后强制退出
+//                long start = System.currentTimeMillis();
+//                while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
+//                    Thread.sleep(10);
+//                }
+//                if (!stream.isClosed()) {
+//                    stream.close();
+//                }
+//            }
+//
+//            // 获取stream所有输出
+//            Queue<byte[]> results = stream.getReadQueue();
+//            StringBuilder sb = new StringBuilder();
+//            for (byte[] bytes : results) {
+//                if (bytes != null) {
+//                    sb.append(new String(bytes));
+//                }
+//            }
+//            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
+//            streams.remove(stream);
+//            return sb.toString();
+//        } catch (Throwable e) {
+//            Alog.e(e);
+//        }
+//
+//        return "";
+//    }
+//
+//
+//    private static String execAdbCmdWithStatus(final String cmd, final int wait) {
+//        if (connection == null) {
+//            Alog.e(new NullPointerException("[execAdbCmdWithStatus] connection is null"));
+//            return "";
+//        }
+//
+//        try {
+//            AdbStream stream = connection.open("shell:" + cmd);
+//            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
+//            streams.add(stream);
+//
+//            // 当wait为0，每个10ms观察一次stream状况，直到shutdown
+//            if (wait == 0) {
+//                while (!stream.isClosed()) {
+//                    Thread.sleep(10);
+//                }
+//            } else {
+//                // 等待wait毫秒后强制退出
+//                long start = System.currentTimeMillis();
+//                while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
+//                    Thread.sleep(10);
+//                }
+//                if (!stream.isClosed()) {
+//                    stream.close();
+//                }
+//            }
+//
+//            // 获取stream所有输出
+//            Queue<byte[]> results = stream.getReadQueue();
+//            StringBuilder sb = new StringBuilder();
+//            for (byte[] bytes : results) {
+//                if (bytes != null) {
+//                    sb.append(new String(bytes));
+//                }
+//            }
+//
+//            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
+//            streams.remove(stream);
+//            return sb.toString();
+//        } catch (Throwable e) {
+//            Alog.e(e);
+//        }
+//        return "";
+//    }
 
 
 }

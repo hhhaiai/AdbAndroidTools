@@ -3,7 +3,7 @@ package me.hhhaiai.utils;
 import android.text.TextUtils;
 import android.util.Log;
 
-import me.hhhaiai.HighPrivilegeCommand;
+import me.hhhaiai.utils.ref.ContentHolder;
 
 /**
  * @Copyright © 2022 sanbo Inc. All rights reserved.
@@ -119,7 +119,7 @@ public final class Alog {
      * @return The number of bytes written.
      */
     public static int println(int priority, String tag, String msg) {
-        if (!HighPrivilegeCommand.isDebug) {
+        if (!ContentHolder.isDebug()) {
             return 0;
         }
         //process tag

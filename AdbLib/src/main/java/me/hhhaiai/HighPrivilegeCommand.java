@@ -4,13 +4,13 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import me.hhhaiai.adblib.AdbCommand;
-import me.hhhaiai.rootlib.RootCommand;
+import me.hhhaiai.adblib.IAdbCallBack;
+import me.hhhaiai.utils.ShellCommand;
 import me.hhhaiai.utils.ref.ContentHolder;
 
 public class HighPrivilegeCommand {
 
     private static HighPrivilegeCommand mHighPrivilegeCommand = new HighPrivilegeCommand();
-    public static boolean isDebug = true;
 
     private HighPrivilegeCommand() {
     }
@@ -49,15 +49,32 @@ public class HighPrivilegeCommand {
         return mHighPrivilegeCommand;
     }
 
+    /**
+     * 设置adb tcpip {tcpip}.
+     * @param port 用户设置的自定义tcpip端口
+     * @return
+     */
+    public static HighPrivilegeCommand tcpip(int port) {
+        ContentHolder.setPort(port);
+        return mHighPrivilegeCommand;
+    }
 
     /**
-     * 运行高权限命令
+     *  默认会执行adb初始化
+     * @param callBack
+     */
+    public static void build(IAdbCallBack callBack) {
+        AdbCommand.generateConnection(callBack);
+    }
+
+    /**
+     * 运行高权限命令,先确认是否可以root,然后再执行adb
      * @param cmd
      * @return
      */
     public static String execHighPrivilegeCmd(String cmd) {
-        if (RootCommand.ready()) {
-            return RootCommand.execRootCmd(cmd, null, true, null).toString();
+        if (ShellCommand.ready()) {
+            return ShellCommand.su(cmd);
         }
         return AdbCommand.execAdbCmd(cmd, 0);
     }

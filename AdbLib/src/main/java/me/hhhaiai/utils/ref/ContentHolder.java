@@ -19,6 +19,8 @@ public class ContentHolder {
     private static Context mContext = null;
     private static String mCacheDir = null;
     private static boolean isDebug = true;
+    private static String mlocalAddress = "";
+    private static int mPort = 5555;
 
 
     /**
@@ -83,7 +85,7 @@ public class ContentHolder {
      * @return
      */
     public static String getCacheDir() {
-        if (Texts.isEmpty(mCacheDir)) {
+        if (!Texts.isEmpty(mCacheDir)) {
             return mCacheDir;
         }
         get();
@@ -102,5 +104,14 @@ public class ContentHolder {
             mCacheDir = cacheKeyDirName;
         }
     }
+    public static int getPort(){
+        return mPort;
+    }
+    public static void setPort(int port) {
+        mPort=port;
+    }
 
+    public static String getAddress(){
+        return mlocalAddress;
+    }
 }

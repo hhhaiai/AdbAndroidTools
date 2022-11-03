@@ -5,16 +5,19 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import me.hhhaiai.HighPrivilegeCommand;
+import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.Alog;
-import me.hhhaiai.utils.ref.Reflect;
+import me.hhhaiai.utils.Pools;
 
 public class MainActivity extends Activity {
+    private volatile boolean isSuccess = false;
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-//        HidenCall.unseal();
     }
 
     @Override
@@ -23,47 +26,47 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
     }
 
+
     public void onClick(final View v) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (v.getId() == R.id.btnA) {
-//                    boolean res = AdbCommand.context(MainActivity.this).generateConnection();
-//                    if (!res) {
-//                        runOnUiThread(new Runnable() {
-//                            @SuppressLint("NewApi")
-//                            @Override
-//                            public void run() {
-//                                Toast.makeText(MainActivity.this, "请在命令行执行命令[adb tcpip 5555]", Toast.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    } else {
-//                        runOnUiThread(new Runnable() {
-//                            @SuppressLint("NewApi")
-//                            @Override
-//                            public void run() {
-//                                Toast.makeText(MainActivity.this, "success", Toast.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    }
-//                    i("generateConnection result:" + res);
-                } else if (v.getId() == R.id.btnB) {
-//                    String res = AdbCommand.execHighPrivilegeCmd("dumpsys window | grep mCurrentFocus");
-//                    i("execHighPrivilegeCmd result:" + res);
 
-
-                    Object activityThread = Reflect.onClass("android.app.ActivityThread").call("currentActivityThread").get();
-                    Object application = Reflect.on(activityThread).call("getApplication");
-                    Alog.i("activityThread:" + activityThread
-                            + "\r\napplication:" + application
-                    );
+        if (v.getId() == R.id.btnA) {
+            HighPrivilegeCommand.debug(true).context(MainActivity.this).build(new IAdbCallBack() {
+                @Override
+                public void onError(Throwable exception) {
+                    Alog.i("收到异常！！！" + exception.getMessage());
+                    isSuccess = false;
+                    Pools.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "adb 链接失败！！ 原因:\r\n" + Log.getStackTraceString(exception), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
+
+                @Override
+                public void onSuccess() {
+                    isSuccess = true;
+                    Alog.i("成功！！！");
+                    Pools.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "adb 链接成功！！！", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                }
+            });
+        } else if (v.getId() == R.id.btnB) {
+            if (!isSuccess) {
+                Toast.makeText(MainActivity.this, "[" + isSuccess + "] adb 认证失败，请先检查后再玩吧~~", Toast.LENGTH_LONG).show();
+                return;
             }
-        }).start();
+            String res = HighPrivilegeCommand.execHighPrivilegeCmd("dumpsys window | grep mCurrentFocus");
+            Alog.i("[" + isSuccess + "]execHighPrivilegeCmd result:" + res);
+            Toast.makeText(MainActivity.this, "[" + isSuccess + "]execHighPrivilegeCmd result:" + res, Toast.LENGTH_LONG).show();
+
+        }
     }
 
-    private void i(String s) {
-        Log.println(Log.INFO, "sanbo", s);
-    }
 }
