@@ -1,16 +1,15 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
 }
 
 android {
+    namespace 'com.cgutman.adblib'
     compileSdk 32
 
     defaultConfig {
-        applicationId "me.sanbo.adbtools"
         minSdk 21
         targetSdk 32
-        versionCode 1
-        versionName "1.0"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -44,12 +43,14 @@ android {
         ignoreWarnings true
         textOutput "stdout"
         textReport false
+
         // turn off checking the given issue id's
         disable 'TypographyFractions', 'TypographyQuotes'
         // turn on the given issue id's
         enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
         // check *only* the given issue id's
         check 'NewApi', 'InlinedApi'
+
     }
 }
 
@@ -59,7 +60,5 @@ tasks.withType(Javadoc) {
     options.addStringOption('charSet', 'UTF-8')
     options.encoding = "UTF-8"
 }
-
 dependencies {
-    implementation project(path: ':AdbLib')
 }
