@@ -11,6 +11,7 @@ import me.hhhaiai.utils.ref.ContentHolder;
 public class HighPrivilegeCommand {
 
     private static HighPrivilegeCommand mHighPrivilegeCommand = new HighPrivilegeCommand();
+    private static boolean isShellMode = false;
 
     private HighPrivilegeCommand() {
     }
@@ -40,6 +41,16 @@ public class HighPrivilegeCommand {
     }
 
     /**
+     * 是否优先使用root模式，默认不使用。可选项
+     * @param _isShellMode
+     * @return
+     */
+    public static HighPrivilegeCommand shellMode(boolean _isShellMode) {
+        isShellMode = _isShellMode;
+        return mHighPrivilegeCommand;
+    }
+
+    /**
      * 是否日志调试.可选项
      * @param _isDebug
      * @return
@@ -50,7 +61,7 @@ public class HighPrivilegeCommand {
     }
 
     /**
-     * 设置adb tcpip {tcpip}.
+     * 设置adb tcpip {tcpip}.可选项
      * @param port 用户设置的自定义tcpip端口
      * @return
      */
@@ -60,7 +71,7 @@ public class HighPrivilegeCommand {
     }
 
     /**
-     *  默认会执行adb初始化
+     *  默认会执行adb初始化,必须选项
      * @param callBack
      */
     public static void build(IAdbCallBack callBack) {
@@ -73,7 +84,7 @@ public class HighPrivilegeCommand {
      * @return
      */
     public static String execHighPrivilegeCmd(String cmd) {
-        if (ShellCommand.ready()) {
+        if (isShellMode && ShellCommand.ready()) {
             return ShellCommand.su(cmd);
         }
         return AdbCommand.execAdbCmd(cmd, 0);

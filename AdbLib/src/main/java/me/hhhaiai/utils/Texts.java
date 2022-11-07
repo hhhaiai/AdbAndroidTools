@@ -15,7 +15,7 @@ public class Texts {
         if (a == null || b == null) {
             return false;
         }
-        return a.toString().equals(b.toString());
+        return trim(a).equals(trim(b));
     }
 
     /**

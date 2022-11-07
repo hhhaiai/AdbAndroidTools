@@ -3,6 +3,11 @@ package me.hhhaiai.adblib;
 import android.os.Looper;
 import android.util.Base64;
 
+import me.hhhaiai.utils.Alog;
+import me.hhhaiai.utils.Pools;
+import me.hhhaiai.utils.Streams;
+import me.hhhaiai.utils.ref.ContentHolder;
+
 import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,11 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import me.hhhaiai.utils.Alog;
-import me.hhhaiai.utils.Pools;
-import me.hhhaiai.utils.Streams;
-import me.hhhaiai.utils.ref.ContentHolder;
 
 public class AdbCommand {
     private static String TAG = "sanbo.Mys";
@@ -147,6 +147,11 @@ public class AdbCommand {
         }
     }
 
+    /**
+     * 生成配对的公钥、秘钥
+     * @param callBack
+     * @return
+     */
     private static boolean generateConnectionImpl(IAdbCallBack callBack) {
         if (connection != null && connection.isFine()) {
             Alog.i(" connection is fine~~");

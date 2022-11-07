@@ -11,6 +11,8 @@ import me.hhhaiai.HighPrivilegeCommand;
 import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.Alog;
 import me.hhhaiai.utils.Pools;
+import me.hhhaiai.utils.ShellCommand;
+import me.hhhaiai.utils.Texts;
 
 public class MainActivity extends Activity {
     private volatile boolean isSuccess = false;
@@ -31,42 +33,61 @@ public class MainActivity extends Activity {
 
 
         if (v.getId() == R.id.btnA) {
-            HighPrivilegeCommand.debug(true).context(MainActivity.this).build(new IAdbCallBack() {
-                @Override
-                public void onError(Throwable exception) {
-                    Alog.i("收到异常！！！" + exception.getMessage());
-                    isSuccess = false;
-                    Pools.runOnUiThread(new Runnable() {
+            HighPrivilegeCommand.debug(true)
+                    .context(MainActivity.this)
+                    .build(new IAdbCallBack() {
                         @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "adb 链接失败！！ 原因:\r\n" + Log.getStackTraceString(exception), Toast.LENGTH_LONG).show();
+                        public void onError(Throwable exception) {
+                            Alog.i("收到异常！！！" + exception.getMessage());
+                            isSuccess = false;
+                            show("adb 链接失败！！ 请执行如下命令:"
+                                    + "\r\nadb tcpip 5555"
+                                    + "\r\n异常:" + Log.getStackTraceString(exception));
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            isSuccess = true;
+                            show("adb 链接成功！！！");
                         }
                     });
-                }
-
-                @Override
-                public void onSuccess() {
-                    isSuccess = true;
-                    Alog.i("成功！！！");
-                    Pools.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "adb 链接成功！！！", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-            });
         } else if (v.getId() == R.id.btnB) {
             if (!isSuccess) {
-                Toast.makeText(MainActivity.this, "[" + isSuccess + "] adb 认证失败，请先检查后再玩吧~~", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this
+                                , "[" + isSuccess + "] adb 认证失败，请先检查后再玩吧~~"
+                                , Toast.LENGTH_LONG)
+                        .show();
                 return;
             }
-            String res = HighPrivilegeCommand.execHighPrivilegeCmd("dumpsys window | grep mCurrentFocus");
-            Alog.i("[" + isSuccess + "]execHighPrivilegeCmd result:" + res);
-            Toast.makeText(MainActivity.this, "[" + isSuccess + "]execHighPrivilegeCmd result:" + res, Toast.LENGTH_LONG).show();
+            String shellCmd = "dumpsys window | grep mCurrentFocus";
+            //adb shell xxxx
+            String res = HighPrivilegeCommand.execHighPrivilegeCmd(shellCmd);
+            show("命令:" + shellCmd
+                    + "\r\n执行结果:" + res);
+        } else if (v.getId() == R.id.btnC) {
+            boolean isRoot = ShellCommand.ready();
+            show("=====root模式检测========" +
+                    "\r\nroot模式:" + isRoot
+                    + "\r\ntype_su:" + ShellCommand.exec("type su")
+                    + "\r\nwhich_su:" + ShellCommand.exec("which su")
+                    + "\r\ngetprop:" + ShellCommand.exec("getprop ro.secure")
+            );
 
         }
+    }
+
+    /**
+     * show log
+     * @param info
+     */
+    private void show(String info) {
+        if (Texts.isEmpty(info)) {
+            return;
+        }
+        Pools.runOnUiThread(() -> {
+            Alog.i(info);
+            Toast.makeText(MainActivity.this, info, Toast.LENGTH_LONG).show();
+        });
     }
 
 }

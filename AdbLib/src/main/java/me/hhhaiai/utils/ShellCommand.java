@@ -13,6 +13,10 @@ import java.io.OutputStream;
 public class ShellCommand {
     private static Boolean isRoot = null;
 
+    /**
+     * 高版本，直接失败
+     * @return
+     */
     public static boolean ready() {
         if (isRoot != null) {
             if (isRoot) {
@@ -43,6 +47,10 @@ public class ShellCommand {
         try {
             //1. find the su files
             for (String path : suPaths) {
+                Alog.i("path:" + path
+                        + "\r\nsu:" + new File(path + "su").exists()
+                        + "\r\nmysu:" + new File(path + "mysu").exists()
+                );
                 if (new File(path + "su").exists() || new File(path + "mysu").exists()) {
                     isRoot = true;
                     return isRoot;
@@ -71,6 +79,14 @@ public class ShellCommand {
                     return isRoot;
                 }
             }
+            // 3. adb shell getprop ro.secure 返回值1则未root，返回值为0则已root
+            String r1 = ShellCommand.exec("getprop ro.secure");
+            if (!Texts.isEmpty(r1) && Texts.equals(r1, "0")) {
+                return true;
+            }
+            // 4. adb shell su
+
+
         } catch (Throwable igone) {
             Alog.e(igone);
         }
