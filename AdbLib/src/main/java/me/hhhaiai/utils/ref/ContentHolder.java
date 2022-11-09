@@ -47,13 +47,14 @@ public class ContentHolder {
             //public static ActivityThread currentActivityThread()
             Object activityThread = Reflect.onClass("android.app.ActivityThread").call("currentActivityThread").get();
             //public Application getApplication()
-            Object application = Reflect.on(activityThread).call("getApplication");
+            Object application = Reflect.on(activityThread).call("getApplication").get();
             if (application == null) {
                 application = Reflect.onClass("android.app.AppGlobals").call("getInitialApplication").get();
             }
             if (application != null) {
                 mContext = ((Application) application).getApplicationContext();
                 return mContext;
+
             }
             //public ContextImpl getSystemContext() ---call--->ContextImpl.createSystemContext(this);
             mContext = Reflect.on(activityThread).call("getSystemContext").get();
@@ -104,14 +105,16 @@ public class ContentHolder {
             mCacheDir = cacheKeyDirName;
         }
     }
-    public static int getPort(){
+
+    public static int getPort() {
         return mPort;
     }
+
     public static void setPort(int port) {
-        mPort=port;
+        mPort = port;
     }
 
-    public static String getAddress(){
+    public static String getAddress() {
         return mlocalAddress;
     }
 }

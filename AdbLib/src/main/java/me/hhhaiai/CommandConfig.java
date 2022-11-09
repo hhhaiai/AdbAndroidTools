@@ -9,7 +9,7 @@ import me.hhhaiai.utils.ShellCommand;
 import me.hhhaiai.utils.ref.ContentHolder;
 
 /**
- * 命令相关配置选项
+ * 命令相关配置选项, 可选择配置，也可以不选择配置
  */
 public class CommandConfig {
     private CommandConfig() {
@@ -80,16 +80,15 @@ public class CommandConfig {
     public static void build(IAdbCallBack callBack) {
         AdbCommand.generateConnection(callBack);
     }
-
     /**
      * 运行高权限命令,先确认是否可以root,然后再执行adb
      * @param cmd
      * @return
      */
-    public static String execHighPrivilegeCmd(String cmd) {
+    public static String execCmd(String cmd) {
         if (isShellMode && ShellCommand.ready()) {
             return ShellCommand.su(cmd);
         }
-        return AdbCommand.execAdbCmd(cmd, 0);
+        return AwesomeCommand.exec(cmd);
     }
 }

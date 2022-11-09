@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import me.hhhaiai.AwesomeCommand;
 import me.hhhaiai.CommandConfig;
 import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.Alog;
@@ -61,7 +62,7 @@ public class MainActivity extends Activity {
             }
             String shellCmd = "dumpsys window | grep mCurrentFocus";
             //adb shell xxxx
-            String res = CommandConfig.execHighPrivilegeCmd(shellCmd);
+            String res = CommandConfig.execCmd(shellCmd);
             show("命令:" + shellCmd
                     + "\r\n执行结果:" + res);
         } else if (v.getId() == R.id.btnC) {
@@ -72,7 +73,8 @@ public class MainActivity extends Activity {
                     + "\r\nwhich_su:" + ShellCommand.exec("which su")
                     + "\r\ngetprop:" + ShellCommand.exec("getprop ro.secure")
             );
-
+        } else if (v.getId() == R.id.btnD) {
+            AwesomeCommand.getFps();
         }
     }
 

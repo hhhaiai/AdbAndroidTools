@@ -7,7 +7,6 @@ import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,30 +26,29 @@ public class AdbCommand {
     private static List<AdbStream> streams = new ArrayList<AdbStream>();
 
 
+    public static boolean isReady() {
+        if (connection == null) {
+            Alog.e("no connection when check connection...");
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 执行Adb命令，对外<br/>
      * <b>注意：主线程执行的话超时时间会强制设置为5S以内，防止ANR</b>
      * @param cmd 对应命令
-     * @param wait 等待执行时间，0表示一直等待
      * @return 命令行输出
      */
-    public static String execAdbCmd(final String cmd, int wait) {
-        // 主线程的话走Callable
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            if (wait > 5000 || wait == 0) {
-                Alog.w(String.format("主线程配置的等待时间[%dms]过长，修改为5000ms", wait));
-                wait = 5000;
-            }
+    public static String execAdbCmd(final String cmd) {
 
-            final int finalWait = wait;
-            Callable<String> callable = new Callable<String>() {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Future<String> result = cachedExecutor.submit(new Callable<String>() {
                 @Override
                 public String call() {
-                    return _execAdbCmd(cmd, finalWait);
+                    return _execAdbCmd(cmd);
                 }
-            };
-            Future<String> result = cachedExecutor.submit(callable);
-
+            });
             // 等待执行完毕
             try {
                 return result.get();
@@ -59,49 +57,27 @@ public class AdbCommand {
             }
             return null;
         }
-        return _execAdbCmd(cmd, wait);
+        return _execAdbCmd(cmd);
     }
 
     /**
      * 执行Adb命令
      * @param cmd 对应命令
-     * @param wait 等待执行时间，0表示一直等待
      * @return 命令行输出
      */
-    public static String _execAdbCmd(final String cmd, final int wait) {
+    public static String _execAdbCmd(final String cmd) {
         if (connection == null) {
             Alog.e("no connection when execAdbCmd");
             return null;
         }
-
         try {
             AdbStream stream = connection.open("shell:" + cmd);
             Alog.cmd("__命令__" + stream.getLocalId() + "@" + "shell:" + cmd);
             streams.add(stream);
 
-            /**
-             * 延迟多少时间执行
-             */
-            // 当wait为0，每个10ms观察一次stream状况，直到shutdown
-            if (wait == 0) {
-                while (!stream.isClosed()) {
-                    Thread.sleep(10);
-                }
-            } else {
-                // 等待最长wait毫秒后强制退出
-                long start = System.currentTimeMillis();
-                while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
-                    Thread.sleep(10);
-                }
-                if (!stream.isClosed()) {
-                    stream.close();
-                }
-            }
-
-            // 获取stream所有输出
-            Queue<byte[]> results = stream.getReadQueue();
             StringBuilder sb = new StringBuilder();
-            for (byte[] bytes : results) {
+            // 获取stream所有输出
+            for (byte[] bytes : stream.getReadQueue()) {
                 if (bytes != null) {
                     sb.append(new String(bytes));
                 }
@@ -111,18 +87,11 @@ public class AdbCommand {
             return sb.toString();
         } catch (Throwable e) {
             Alog.e(e);
-
             if (connection != null) {
                 connection.setFine(false);
             }
-//            // 重试部分暂时去除
-//            boolean result = generateConnectionImpl(null);
-//            if (result) {
-//                return retryExecAdb(cmd, wait);
-//            }
-
         }
-        return "";
+        return null;
     }
 
 
@@ -131,20 +100,17 @@ public class AdbCommand {
      * @return
      * @param callBack
      */
-    public static void generateConnection(IAdbCallBack callBack) {
-
+    public static boolean generateConnection(IAdbCallBack callBack) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Pools.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Alog.i(" main thread");
-                    generateConnectionImpl(callBack);
-                }
+            Pools.execute(() -> {
+                Alog.i(" main thread");
+                generateConnectionImpl(callBack);
             });
         } else {
             Alog.i("not main thread");
-            generateConnectionImpl(callBack);
+            return generateConnectionImpl(callBack);
         }
+        return false;
     }
 
     /**
