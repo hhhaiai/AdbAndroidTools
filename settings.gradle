@@ -4,46 +4,53 @@ pluginManagement {
         mavenLocal()
         mavenCentral()
         google()
-//        jcenter()
+        jcenter()
+        //Could not HEAD 'https://jcenter.bintray.com/org/ow2/asm/asm/9.1/asm-9.1.jar'. Received status code 403 from server: Forbidden
+        maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
         // jcenter() { url "http://jcenter.bintray.com/" }
         maven { url 'https://repo1.maven.org/maven2/' }
-        // central
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
-        // jcenter
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
-        // public
-        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
-        //google
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
-        //gradle-plugin
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
-        //apache snapshots
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
+//        // central
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
+//        // jcenter
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+//        // public
+//        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+//        //google
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+//        //gradle-plugin
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+//        //apache snapshots
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        gradlePluginPortal()
         mavenLocal()
         mavenCentral()
         google()
-//        jcenter()
+        jcenter()
+        maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
         // jcenter() { url "http://jcenter.bintray.com/" }
         maven { url 'https://repo1.maven.org/maven2/' }
-        // central
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
-        // jcenter
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
-        // public
-        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
-        //google
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
-        //gradle-plugin
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
-        //apache snapshots
-        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
+        // // 应该是高版本报错。NND。。ali阿里源在部分场景下会报错误:
+        // //Could not HEAD 'https://jcenter.bintray.com/org/ow2/asm/asm/9.1/asm-9.1.jar'.
+        // //   Received status code 403 from server: Forbidden
+//        // central
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/central' }
+//        // jcenter
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+//        // public
+//        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+//        //google
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+//        //gradle-plugin
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+//        //apache snapshots
+//        maven { url 'https://maven.aliyun.com/nexus/content/repositories/apache-snapshots' }
     }
 }
 rootProject.name = "AdbAndroidTools"
