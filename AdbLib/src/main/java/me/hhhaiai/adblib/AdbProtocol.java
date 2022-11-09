@@ -39,8 +39,7 @@ class AdbProtocol {
         }
     }
 
-    /** AUTH is the authentication message. It is part of the
-     * RSA public key authentication added in Android 4.2.2. */
+    /** AUTH is the authentication message. It is part of the RSA public key authentication added in Android 4.2.2. */
     public static final int CMD_AUTH = 0x48545541;
 
     /** This authentication type represents a SHA1 hash to sign */
@@ -52,20 +51,16 @@ class AdbProtocol {
     /** This authentication type represents a RSA public key */
     public static final int AUTH_TYPE_RSA_PUBLIC = 3;
 
-    /** OPEN is the open stream message. It is sent to open
-     * a new stream on the target device. */
+    /** OPEN is the open stream message. It is sent to open  a new stream on the target device. */
     public static final int CMD_OPEN = 0x4e45504f;
 
-    /** OKAY is a success message. It is sent when a write is
-     * processed successfully. */
+    /** OKAY is a success message. It is sent when a write is processed successfully. */
     public static final int CMD_OKAY = 0x59414b4f;
 
-    /** CLSE is the close stream message. It it sent to close an
-     * existing stream on the target device. */
+    /** CLSE is the close stream message. It it sent to close an existing stream on the target device. */
     public static final int CMD_CLSE = 0x45534c43;
 
-    /** WRTE is the write stream message. It is sent with a payload
-     * that is the data to write to the stream. */
+    /** WRTE is the write stream message. It is sent with a payload that is the data to write to the stream. */
     public static final int CMD_WRTE = 0x45545257;
 
     /**

@@ -8,13 +8,16 @@ import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.ShellCommand;
 import me.hhhaiai.utils.ref.ContentHolder;
 
-public class HighPrivilegeCommand {
+/**
+ * 命令相关配置选项
+ */
+public class CommandConfig {
+    private CommandConfig() {
+    }
 
-    private static HighPrivilegeCommand mHighPrivilegeCommand = new HighPrivilegeCommand();
+    private static CommandConfig mHighPrivilegeCommand = new CommandConfig();
     private static boolean isShellMode = false;
 
-    private HighPrivilegeCommand() {
-    }
 
 
     /**
@@ -22,7 +25,7 @@ public class HighPrivilegeCommand {
      * @param ctx
      * @return
      */
-    public static HighPrivilegeCommand context(Context ctx) {
+    public static CommandConfig context(Context ctx) {
         ContentHolder.get(ctx);
         return mHighPrivilegeCommand;
     }
@@ -33,7 +36,7 @@ public class HighPrivilegeCommand {
      * @param cacheKeyDirName
      * @return
      */
-    public static HighPrivilegeCommand cacheKeyPath(String cacheKeyDirName) {
+    public static CommandConfig cacheKeyPath(String cacheKeyDirName) {
         if (!TextUtils.isEmpty(cacheKeyDirName)) {
             ContentHolder.setCacheDir(cacheKeyDirName);
         }
@@ -45,7 +48,7 @@ public class HighPrivilegeCommand {
      * @param _isShellMode
      * @return
      */
-    public static HighPrivilegeCommand shellMode(boolean _isShellMode) {
+    public static CommandConfig shellMode(boolean _isShellMode) {
         isShellMode = _isShellMode;
         return mHighPrivilegeCommand;
     }
@@ -55,7 +58,7 @@ public class HighPrivilegeCommand {
      * @param _isDebug
      * @return
      */
-    public static HighPrivilegeCommand debug(boolean _isDebug) {
+    public static CommandConfig debug(boolean _isDebug) {
         ContentHolder.setDebug(_isDebug);
         return mHighPrivilegeCommand;
     }
@@ -65,7 +68,7 @@ public class HighPrivilegeCommand {
      * @param port 用户设置的自定义tcpip端口
      * @return
      */
-    public static HighPrivilegeCommand tcpip(int port) {
+    public static CommandConfig tcpip(int port) {
         ContentHolder.setPort(port);
         return mHighPrivilegeCommand;
     }

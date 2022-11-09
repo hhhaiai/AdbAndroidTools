@@ -3,11 +3,6 @@ package me.hhhaiai.adblib;
 import android.os.Looper;
 import android.util.Base64;
 
-import me.hhhaiai.utils.Alog;
-import me.hhhaiai.utils.Pools;
-import me.hhhaiai.utils.Streams;
-import me.hhhaiai.utils.ref.ContentHolder;
-
 import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,15 +13,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class AdbCommand {
-    private static String TAG = "sanbo.Mys";
-    private static ExecutorService cachedExecutor = Executors.newCachedThreadPool();
-    //    private static List<Process> processes = new ArrayList<>();
-    private static volatile AdbConnection connection;
-    private static List<AdbStream> streams = new ArrayList<AdbStream>();
+import me.hhhaiai.utils.Alog;
+import me.hhhaiai.utils.Pools;
+import me.hhhaiai.utils.Streams;
+import me.hhhaiai.utils.ref.ContentHolder;
 
+public class AdbCommand {
     private AdbCommand() {
     }
+
+    private static ExecutorService cachedExecutor = Executors.newCachedThreadPool();
+    private static volatile AdbConnection connection;
+    private static List<AdbStream> streams = new ArrayList<AdbStream>();
 
 
     /**
@@ -81,6 +79,9 @@ public class AdbCommand {
             Alog.cmd("__命令__" + stream.getLocalId() + "@" + "shell:" + cmd);
             streams.add(stream);
 
+            /**
+             * 延迟多少时间执行
+             */
             // 当wait为0，每个10ms观察一次stream状况，直到shutdown
             if (wait == 0) {
                 while (!stream.isClosed()) {
@@ -92,7 +93,6 @@ public class AdbCommand {
                 while (!stream.isClosed() && System.currentTimeMillis() - start < wait) {
                     Thread.sleep(10);
                 }
-
                 if (!stream.isClosed()) {
                     stream.close();
                 }

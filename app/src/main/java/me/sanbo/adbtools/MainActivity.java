@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import me.hhhaiai.HighPrivilegeCommand;
+import me.hhhaiai.CommandConfig;
 import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.Alog;
 import me.hhhaiai.utils.Pools;
@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
 
 
         if (v.getId() == R.id.btnA) {
-            HighPrivilegeCommand.debug(true)
+            CommandConfig.debug(true)
                     .context(MainActivity.this)
                     .build(new IAdbCallBack() {
                         @Override
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
             }
             String shellCmd = "dumpsys window | grep mCurrentFocus";
             //adb shell xxxx
-            String res = HighPrivilegeCommand.execHighPrivilegeCmd(shellCmd);
+            String res = CommandConfig.execHighPrivilegeCmd(shellCmd);
             show("命令:" + shellCmd
                     + "\r\n执行结果:" + res);
         } else if (v.getId() == R.id.btnC) {

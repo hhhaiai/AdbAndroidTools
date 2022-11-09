@@ -199,11 +199,8 @@ class AdbCrypto {
      */
     public byte[] signAdbTokenPayload(byte[] payload) throws GeneralSecurityException {
         Cipher c = Cipher.getInstance("RSA/ECB/NoPadding");
-
         c.init(Cipher.ENCRYPT_MODE, keyPair.getPrivate());
-
         c.update(SIGNATURE_PADDING);
-
         return c.doFinal(payload);
     }
 

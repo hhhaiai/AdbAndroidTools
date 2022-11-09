@@ -93,12 +93,10 @@ class AdbConnection implements Closeable {
      */
     public static AdbConnection create(Socket socket, AdbCrypto crypto) throws IOException {
         AdbConnection newConn = new AdbConnection();
-
         newConn.crypto = crypto;
-
         newConn.socket = socket;
 
-        // 试试bufferedStream
+        // @todo 试试bufferedStream
         newConn.inputStream = socket.getInputStream();
         newConn.outputStream = socket.getOutputStream();
 
