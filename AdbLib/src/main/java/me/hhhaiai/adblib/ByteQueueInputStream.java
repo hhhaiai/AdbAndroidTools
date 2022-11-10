@@ -34,12 +34,12 @@ import java.io.InputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * from com.cgutman.adblib;
  * 参照ByteArrayInputStream实现，支持使用byte[]队列作为数据源
  *
  * @author ruikai.qrk
  * @see     java.io.ByteArrayInputStream
  */
+public
 class ByteQueueInputStream extends InputStream {
 
     private boolean isRunning;

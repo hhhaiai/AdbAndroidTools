@@ -23,9 +23,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * from com.cgutman.adblib;
- */
 public class AdbMessageManager {
 
     /**

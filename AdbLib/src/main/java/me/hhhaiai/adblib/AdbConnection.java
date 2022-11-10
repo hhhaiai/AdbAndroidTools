@@ -9,11 +9,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
 /**
- * from com.cgutman.adblib;
  * This class represents an ADB connection.
  * @author Cameron Gutman
  */
-class AdbConnection implements Closeable {
+public class AdbConnection implements Closeable {
 
     /** The underlying socket that this class uses to
      * communicate with the target device.
@@ -93,10 +92,12 @@ class AdbConnection implements Closeable {
      */
     public static AdbConnection create(Socket socket, AdbCrypto crypto) throws IOException {
         AdbConnection newConn = new AdbConnection();
+
         newConn.crypto = crypto;
+
         newConn.socket = socket;
 
-        // @todo 试试bufferedStream
+        // 试试bufferedStream
         newConn.inputStream = socket.getInputStream();
         newConn.outputStream = socket.getOutputStream();
 

@@ -3,7 +3,6 @@ package me.hhhaiai;
 import android.content.Context;
 import android.text.TextUtils;
 
-import me.hhhaiai.adblib.AdbCommand;
 import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.ShellCommand;
 import me.hhhaiai.utils.ref.ContentHolder;
@@ -78,8 +77,9 @@ public class CommandConfig {
      * @param callBack
      */
     public static void build(IAdbCallBack callBack) {
-        AdbCommand.generateConnection(callBack);
+        AwesomeCommand.generateConnection(callBack);
     }
+
     /**
      * 运行高权限命令,先确认是否可以root,然后再执行adb
      * @param cmd

@@ -62,7 +62,9 @@ public class MainActivity extends Activity {
             }
             String shellCmd = "dumpsys window | grep mCurrentFocus";
             //adb shell xxxx
-            String res = CommandConfig.execCmd(shellCmd);
+            String res = AwesomeCommand.exec(shellCmd, 0);
+
+
             show("命令:" + shellCmd
                     + "\r\n执行结果:" + res);
         } else if (v.getId() == R.id.btnC) {
@@ -74,7 +76,8 @@ public class MainActivity extends Activity {
                     + "\r\ngetprop:" + ShellCommand.exec("getprop ro.secure")
             );
         } else if (v.getId() == R.id.btnD) {
-            AwesomeCommand.getFps();
+//            AwesomeCommand.getFps();
+            AwesomeCommand.getTopActivityAndProcess(this.getPackageName());
         }
     }
 

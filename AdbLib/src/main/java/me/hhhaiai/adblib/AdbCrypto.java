@@ -25,7 +25,7 @@ import javax.crypto.Cipher;
  * an interface for the storage and retrieval of keys.
  * @author Cameron Gutman
  */
-class AdbCrypto {
+public class AdbCrypto {
 
     /** An RSA keypair encapsulated by the AdbCrypto object */
     private KeyPair keyPair;
@@ -199,8 +199,11 @@ class AdbCrypto {
      */
     public byte[] signAdbTokenPayload(byte[] payload) throws GeneralSecurityException {
         Cipher c = Cipher.getInstance("RSA/ECB/NoPadding");
+
         c.init(Cipher.ENCRYPT_MODE, keyPair.getPrivate());
+
         c.update(SIGNATURE_PADDING);
+
         return c.doFinal(payload);
     }
 

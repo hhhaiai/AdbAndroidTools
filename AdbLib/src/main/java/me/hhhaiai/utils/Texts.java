@@ -32,4 +32,27 @@ public class Texts {
     }
 
 
+    /**
+     * 判断origin是否以sub开始
+     * @param origin 目标字段
+     * @param sub 查找字段
+     * @return
+     */
+    public static boolean startWith(CharSequence origin, CharSequence sub) {
+        if (isEmpty(origin) || isEmpty(sub) || origin.length() < sub.length()) {
+            return false;
+        }
+
+        /**
+         * 比较前n个字符
+         */
+        for (int i = 0; i < sub.length(); i++) {
+            if (origin.charAt(i) != sub.charAt(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
