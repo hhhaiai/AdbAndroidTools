@@ -156,6 +156,7 @@ public class AwesomeCommand {
      * @return
      */
     public static ComponentName getTopinfo() {
+        // 执行有问题
         String cmd = "dumpsys activity top | grep ACTIVITY";
         String r = exec(cmd,9);
         Alog.i("=============["+r+"]" );

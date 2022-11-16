@@ -78,6 +78,7 @@ public class MainActivity extends Activity {
         } else if (v.getId() == R.id.btnD) {
 //            AwesomeCommand.getFps();
             AwesomeCommand.getTopActivityAndProcess(this.getPackageName());
+//            AwesomeCommand.exec("reboot");
         }
     }
 
