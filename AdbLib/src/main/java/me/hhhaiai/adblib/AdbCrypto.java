@@ -1,5 +1,6 @@
 package me.hhhaiai.adblib;
 
+import javax.crypto.Cipher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,42 +8,49 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import javax.crypto.Cipher;
-
 /**
  * This class encapsulates the ADB cryptography functions and provides
  * an interface for the storage and retrieval of keys.
+ *
  * @author Cameron Gutman
  */
 public class AdbCrypto {
 
-    /** An RSA keypair encapsulated by the AdbCrypto object */
+    /**
+     * An RSA keypair encapsulated by the AdbCrypto object
+     */
     private KeyPair keyPair;
 
-    /** The base 64 conversion interface to use */
+    /**
+     * The base 64 conversion interface to use
+     */
     private AdbBase64 base64;
 
-    /** The ADB RSA key length in bits */
+    /**
+     * The ADB RSA key length in bits
+     */
     public static final int KEY_LENGTH_BITS = 2048;
 
-    /** The ADB RSA key length in bytes */
+    /**
+     * The ADB RSA key length in bytes
+     */
     public static final int KEY_LENGTH_BYTES = KEY_LENGTH_BITS / 8;
 
-    /** The ADB RSA key length in words */
+    /**
+     * The ADB RSA key length in words
+     */
     public static final int KEY_LENGTH_WORDS = KEY_LENGTH_BYTES / 4;
 
-    /** The RSA signature padding as an int array */
+    /**
+     * The RSA signature padding as an int array
+     */
     public static final int[] SIGNATURE_PADDING_AS_INT = new int[]
             {
                     0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -66,7 +74,9 @@ public class AdbCrypto {
                     0x04, 0x14
             };
 
-    /** The RSA signature padding as a byte array */
+    /**
+     * The RSA signature padding as a byte array
+     */
     public static byte[] SIGNATURE_PADDING;
 
     static {
@@ -78,6 +88,7 @@ public class AdbCrypto {
 
     /**
      * Converts a standard RSAPublicKey object to the special ADB format
+     *
      * @param pubkey RSAPublicKey object to convert
      * @return Byte array containing the converted RSAPublicKey object
      */
@@ -137,12 +148,13 @@ public class AdbCrypto {
 
     /**
      * Creates a new AdbCrypto object from a key pair loaded from files.
-     * @param base64 Implementation of base 64 conversion interface required by ADB
+     *
+     * @param base64     Implementation of base 64 conversion interface required by ADB
      * @param privateKey File containing the RSA private key
-     * @param publicKey File containing the RSA public key
+     * @param publicKey  File containing the RSA public key
      * @return New AdbCrypto object
-     * @throws IOException If the files cannot be read
-     * @throws NoSuchAlgorithmException If an RSA key factory cannot be found
+     * @throws IOException                        If the files cannot be read
+     * @throws NoSuchAlgorithmException     If an RSA key factory cannot be found
      * @throws InvalidKeySpecException If a PKCS8 or X509 key spec cannot be found
      */
     public static AdbCrypto loadAdbKeyPair(AdbBase64 base64, File privateKey, File publicKey) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -175,6 +187,7 @@ public class AdbCrypto {
 
     /**
      * Creates a new AdbCrypto object by generating a new key pair.
+     *
      * @param base64 Implementation of base 64 conversion interface required by ADB
      * @return A new AdbCrypto object
      * @throws NoSuchAlgorithmException If an RSA key factory cannot be found
@@ -193,6 +206,7 @@ public class AdbCrypto {
 
     /**
      * Signs the ADB SHA1 payload with the private key of this object.
+     *
      * @param payload SHA1 payload to sign
      * @return Signed SHA1 payload
      * @throws GeneralSecurityException If signing fails
@@ -209,6 +223,7 @@ public class AdbCrypto {
 
     /**
      * Gets the RSA public key in ADB format.
+     *
      * @return Byte array containing the RSA public key in ADB format.
      * @throws IOException If the key cannot be retrived
      */
@@ -226,8 +241,9 @@ public class AdbCrypto {
 
     /**
      * Saves the AdbCrypto's key pair to the specified files.
+     *
      * @param privateKey The file to store the encoded private key
-     * @param publicKey The file to store the encoded public key
+     * @param publicKey  The file to store the encoded public key
      * @throws IOException If the files cannot be written
      */
     public void saveAdbKeyPair(File privateKey, File publicKey) throws IOException {

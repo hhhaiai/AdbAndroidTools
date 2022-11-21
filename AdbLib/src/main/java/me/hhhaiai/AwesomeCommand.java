@@ -267,7 +267,6 @@ public class AwesomeCommand {
 
         try {
             AdbStream stream = connection.open("shell:" + cmd);
-            Alog.cmd(stream.getLocalId() + "@" + "shell:" + cmd);
             streams.add(stream);
 
             // 当wait为0，每个10ms观察一次stream状况，直到shutdown
@@ -295,16 +294,15 @@ public class AwesomeCommand {
                     sb.append(new String(bytes));
                 }
             }
-            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (IllegalStateException e) {
             Alog.e(e);
 
 
-            if (connection != null) {
-                connection.setFine(false);
-            }
+//            if (connection != null) {
+//                connection.setFine(false);
+//            }
             boolean result = generateConnection(null);
             if (result) {
                 return retryExecAdb(cmd, wait);
@@ -322,7 +320,7 @@ public class AwesomeCommand {
         AdbStream stream = null;
         try {
             stream = connection.open("shell:" + cmd);
-            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
+//            Alog.cmd(stream.getLocalId() + "@shell:" + cmd);
             streams.add(stream);
 
             // 当wait为0，每个10ms观察一次stream状况，直到shutdown
@@ -349,7 +347,7 @@ public class AwesomeCommand {
                     sb.append(new String(bytes));
                 }
             }
-            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
+//            Alog.cmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (Throwable e) {
@@ -382,7 +380,7 @@ public class AwesomeCommand {
      * @return
      */
     private static boolean generateConnectionImpl(IAdbCallBack callBack) {
-        if (connection != null && connection.isFine()) {
+        if (connection != null ) {
             Alog.i(" connection is fine~~");
             if (callBack != null) {
                 callBack.onSuccess();
