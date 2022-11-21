@@ -36,6 +36,32 @@ public class AwesomeCommand {
 
 
 
+    private static final ExecutorService cachedExecutor = Executors.newCachedThreadPool();
+    private static volatile AdbConnection connection;
+    private static final List<AdbStream> streams = new ArrayList<AdbStream>();
+
+    /**
+     * 默认设置
+     */
+    static {
+        CommandConfig.debug(true)
+                .shellMode(false)
+                .tcpip(5555)
+                .build(new IAdbCallBack() {
+                    @Override
+                    public void onError(Throwable exception) {
+                        Alog.i("[AwesomeCommand]adb 链接失败！！ 请执行如下命令:"
+                                + "\r\nadb tcpip 5555"
+                                + "\r\n异常:" + Log.getStackTraceString(exception));
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        Alog.i("[AwesomeCommand]adb 链接成功！！！");
+                    }
+                });
+    }
+
     public static String getFps() {
         Alog.i("...fps....");
         return null;
@@ -158,42 +184,11 @@ public class AwesomeCommand {
     public static ComponentName getTopinfo() {
         // 执行有问题
         String cmd = "dumpsys activity top | grep ACTIVITY";
-        String r = exec(cmd,9);
-        Alog.i("=============["+r+"]" );
+        String r = exec(cmd, 9);
+        Alog.i("=============[" + r + "]");
 
         return null;
     }
-
-
-
-
-    /**
-     * 默认设置
-     */
-    static {
-        CommandConfig.debug(true)
-                .shellMode(false)
-                .tcpip(5555)
-                .build(new IAdbCallBack() {
-                    @Override
-                    public void onError(Throwable exception) {
-                        Alog.i("[AwesomeCommand]adb 链接失败！！ 请执行如下命令:"
-                                + "\r\nadb tcpip 5555"
-                                + "\r\n异常:" + Log.getStackTraceString(exception));
-                    }
-
-                    @Override
-                    public void onSuccess() {
-                        Alog.i("[AwesomeCommand]adb 链接成功！！！");
-                    }
-                });
-    }
-
-
-    private static ExecutorService cachedExecutor = Executors.newCachedThreadPool();
-    private static volatile AdbConnection connection;
-    private static List<AdbStream> streams = new ArrayList<AdbStream>();
-
 
     public static boolean isReady() {
         if (connection == null) {
@@ -300,9 +295,9 @@ public class AwesomeCommand {
             Alog.e(e);
 
 
-//            if (connection != null) {
-//                connection.setFine(false);
-//            }
+            if (connection != null) {
+                connection.setFine(false);
+            }
             boolean result = generateConnection(null);
             if (result) {
                 return retryExecAdb(cmd, wait);
@@ -380,7 +375,7 @@ public class AwesomeCommand {
      * @return
      */
     private static boolean generateConnectionImpl(IAdbCallBack callBack) {
-        if (connection != null ) {
+        if (connection != null && connection.isFine()) {
             Alog.i(" connection is fine~~");
             if (callBack != null) {
                 callBack.onSuccess();
@@ -457,7 +452,7 @@ public class AwesomeCommand {
 
         AdbConnection conn;
         try {
-            conn = AdbConnection.create(sock, crypto);
+            conn = AdbConnection.create(new TcpChannel(sock), crypto);
             Alog.i("ADB connecting...");
 
             // 10s超时

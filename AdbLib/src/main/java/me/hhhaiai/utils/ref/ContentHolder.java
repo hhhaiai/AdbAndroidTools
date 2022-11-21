@@ -19,7 +19,7 @@ public class ContentHolder {
     private static Context mContext = null;
     private static String mCacheDir = null;
     private static boolean isDebug = true;
-    private static String mlocalAddress = "";
+    private static final String mlocalAddress = "";
     private static int mPort = 5555;
 
 

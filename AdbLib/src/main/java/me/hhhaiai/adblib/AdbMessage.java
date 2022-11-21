@@ -32,7 +32,7 @@ public class AdbMessage {
     }
 
     public AdbMessage(int command, int arg0, int arg1) {
-        this(command, arg0, arg1, (byte[]) null);
+        this(command, arg0, arg1, null);
     }
 
     /**

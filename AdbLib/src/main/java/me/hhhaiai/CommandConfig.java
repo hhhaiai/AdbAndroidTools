@@ -11,13 +11,10 @@ import me.hhhaiai.utils.ref.ContentHolder;
  * 命令相关配置选项, 可选择配置，也可以不选择配置
  */
 public class CommandConfig {
+    private static final CommandConfig mHighPrivilegeCommand = new CommandConfig();
+    private static boolean isShellMode = false;
     private CommandConfig() {
     }
-
-    private static CommandConfig mHighPrivilegeCommand = new CommandConfig();
-    private static boolean isShellMode = false;
-
-
 
     /**
      * 设置context.可选项

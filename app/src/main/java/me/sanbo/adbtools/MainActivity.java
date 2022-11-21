@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import me.hhhaiai.AwesomeCommand;
 import me.hhhaiai.CommandConfig;
+import me.hhhaiai.adblib.IAdbCallBack;
 import me.hhhaiai.utils.Alog;
 import me.hhhaiai.utils.Pools;
 import me.hhhaiai.utils.ShellCommand;

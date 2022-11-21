@@ -3,7 +3,7 @@ package me.hhhaiai.adblib;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class provides useful functions and fields for ADB protocol details.
@@ -34,63 +34,51 @@ public class AdbProtocol {
      * The maximum data payload supported by the ADB implementation
      */
     public static final int CONNECT_MAXDATA = 4096;
-
+    /**
+     * AUTH is the authentication message. It is part of the
+     * RSA public key authentication added in Android 4.2.2.
+     */
+    public static final int CMD_AUTH = 0x48545541;
+    /**
+     * This authentication type represents a SHA1 hash to sign
+     */
+    public static final int AUTH_TYPE_TOKEN = 1;
+    /**
+     * This authentication type represents the signed SHA1 hash
+     */
+    public static final int AUTH_TYPE_SIGNATURE = 2;
+    /**
+     * This authentication type represents a RSA public key
+     */
+    public static final int AUTH_TYPE_RSA_PUBLIC = 3;
+    /**
+     * OPEN is the open stream message. It is sent to open
+     * a new stream on the target device.
+     */
+    public static final int CMD_OPEN = 0x4e45504f;
+    /**
+     * OKAY is a success message. It is sent when a write is
+     * processed successfully.
+     */
+    public static final int CMD_OKAY = 0x59414b4f;
+    /**
+     * CLSE is the close stream message. It it sent to close an
+     * existing stream on the target device.
+     */
+    public static final int CMD_CLSE = 0x45534c43;
+    /**
+     * WRTE is the write stream message. It is sent with a payload
+     * that is the data to write to the stream.
+     */
+    public static final int CMD_WRTE = 0x45545257;
     /**
      * The payload sent with the connect message
      */
     public static byte[] CONNECT_PAYLOAD;
 
     static {
-        try {
-            CONNECT_PAYLOAD = "host::\0".getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-        }
+        CONNECT_PAYLOAD = "host::\0".getBytes(StandardCharsets.UTF_8);
     }
-
-    /**
-     * AUTH is the authentication message. It is part of the
-     * RSA public key authentication added in Android 4.2.2.
-     */
-    public static final int CMD_AUTH = 0x48545541;
-
-    /**
-     * This authentication type represents a SHA1 hash to sign
-     */
-    public static final int AUTH_TYPE_TOKEN = 1;
-
-    /**
-     * This authentication type represents the signed SHA1 hash
-     */
-    public static final int AUTH_TYPE_SIGNATURE = 2;
-
-    /**
-     * This authentication type represents a RSA public key
-     */
-    public static final int AUTH_TYPE_RSA_PUBLIC = 3;
-
-    /**
-     * OPEN is the open stream message. It is sent to open
-     * a new stream on the target device.
-     */
-    public static final int CMD_OPEN = 0x4e45504f;
-
-    /**
-     * OKAY is a success message. It is sent when a write is
-     * processed successfully.
-     */
-    public static final int CMD_OKAY = 0x59414b4f;
-
-    /**
-     * CLSE is the close stream message. It it sent to close an
-     * existing stream on the target device.
-     */
-    public static final int CMD_CLSE = 0x45534c43;
-
-    /**
-     * WRTE is the write stream message. It is sent with a payload
-     * that is the data to write to the stream.
-     */
-    public static final int CMD_WRTE = 0x45545257;
 
     /**
      * This function validate the ADB message by checking
@@ -105,8 +93,7 @@ public class AdbProtocol {
             return false;
 
         if (msg.getPayloadLength() != 0) {
-            if (AdbMessage.checksum(msg.getPayload()) != msg.getChecksum())
-                return false;
+            return AdbMessage.checksum(msg.getPayload()) == msg.getChecksum();
         }
 
         return true;
@@ -164,7 +151,7 @@ public class AdbProtocol {
      */
     public static AdbMessage generateOpen(int localId, String dest) throws UnsupportedEncodingException {
         ByteBuffer bbuf = ByteBuffer.allocate(dest.length() + 1);
-        bbuf.put(dest.getBytes("UTF-8"));
+        bbuf.put(dest.getBytes(StandardCharsets.UTF_8));
         bbuf.put((byte) 0);
         return generateMessage(CMD_OPEN, localId, 0, bbuf.array());
     }

@@ -8,8 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 public class Pools {
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static Handler sUiThreadHandler = new Handler(Looper.getMainLooper());
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final Handler sUiThreadHandler = new Handler(Looper.getMainLooper());
 
     public static boolean isMainThread() {
         return Looper.getMainLooper().getThread() == Thread.currentThread();

@@ -14,7 +14,7 @@ import me.hhhaiai.utils.ref.ContentHolder;
  */
 public final class Alog {
 
-    private static String TAG = "sanbo";
+    private static final String TAG = "sanbo";
 
     private Alog() {
     }

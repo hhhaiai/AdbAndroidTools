@@ -1,4 +1,7 @@
-package me.hhhaiai.adblib;
+package me.hhhaiai;
+
+import me.hhhaiai.adblib.AdbChannel;
+import me.hhhaiai.adblib.AdbMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,18 +16,33 @@ public class TcpChannel implements AdbChannel {
     /**
      * The underlying socket that this class uses to communicate with the target device.
      */
-    private Socket socket;
+    private final Socket socket;
 
     /**
      * The input stream that this class uses to read from the socket.
      */
-    private InputStream inputStream;
+    private final InputStream inputStream;
 
     /**
      * The output stream that this class uses to read from the socket.
      */
-    private OutputStream outputStream;
+    private final OutputStream outputStream;
 
+
+    public TcpChannel(Socket socket) {
+        try {
+            /* Disable Nagle because we're sending tiny packets */
+            socket.setTcpNoDelay(true);
+
+            this.socket = socket;
+            this.inputStream = socket.getInputStream();
+            this.outputStream = socket.getOutputStream();
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void readx(byte[] buffer, int length) throws IOException {
@@ -32,12 +50,9 @@ public class TcpChannel implements AdbChannel {
         int dataRead = 0;
         do {
             int bytesRead = inputStream.read(buffer, dataRead, length - dataRead);
-            if (bytesRead < 0)
-                throw new IOException("Stream closed");
-            else
-                dataRead += bytesRead;
-        }
-        while (dataRead < length);
+            if (bytesRead < 0) throw new IOException("Stream closed");
+            else dataRead += bytesRead;
+        } while (dataRead < length);
     }
 
     private void writex(byte[] buffer) throws IOException {
@@ -56,20 +71,5 @@ public class TcpChannel implements AdbChannel {
     @Override
     public void close() throws IOException {
         socket.close();
-    }
-
-    public TcpChannel(Socket socket) {
-        try {
-            /* Disable Nagle because we're sending tiny packets */
-            socket.setTcpNoDelay(true);
-
-            this.socket = socket;
-            this.inputStream = socket.getInputStream();
-            this.outputStream = socket.getOutputStream();
-
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

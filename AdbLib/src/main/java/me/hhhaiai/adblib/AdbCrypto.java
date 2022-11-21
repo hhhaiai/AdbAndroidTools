@@ -1,6 +1,5 @@
 package me.hhhaiai.adblib;
 
-import javax.crypto.Cipher;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,12 +7,19 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.*;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.Cipher;
 
 /**
  * This class encapsulates the ADB cryptography functions and provides
@@ -24,30 +30,17 @@ import java.security.spec.X509EncodedKeySpec;
 public class AdbCrypto {
 
     /**
-     * An RSA keypair encapsulated by the AdbCrypto object
-     */
-    private KeyPair keyPair;
-
-    /**
-     * The base 64 conversion interface to use
-     */
-    private AdbBase64 base64;
-
-    /**
      * The ADB RSA key length in bits
      */
     public static final int KEY_LENGTH_BITS = 2048;
-
     /**
      * The ADB RSA key length in bytes
      */
     public static final int KEY_LENGTH_BYTES = KEY_LENGTH_BITS / 8;
-
     /**
      * The ADB RSA key length in words
      */
     public static final int KEY_LENGTH_WORDS = KEY_LENGTH_BYTES / 4;
-
     /**
      * The RSA signature padding as an int array
      */
@@ -73,7 +66,6 @@ public class AdbCrypto {
                     0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00,
                     0x04, 0x14
             };
-
     /**
      * The RSA signature padding as a byte array
      */
@@ -85,6 +77,15 @@ public class AdbCrypto {
         for (int i = 0; i < SIGNATURE_PADDING.length; i++)
             SIGNATURE_PADDING[i] = (byte) SIGNATURE_PADDING_AS_INT[i];
     }
+
+    /**
+     * An RSA keypair encapsulated by the AdbCrypto object
+     */
+    private KeyPair keyPair;
+    /**
+     * The base 64 conversion interface to use
+     */
+    private AdbBase64 base64;
 
     /**
      * Converts a standard RSAPublicKey object to the special ADB format
@@ -115,9 +116,9 @@ public class AdbCrypto {
         rem = n.remainder(r32);
         n0inv = rem.modInverse(r32);
 
-        int myN[] = new int[KEY_LENGTH_WORDS];
-        int myRr[] = new int[KEY_LENGTH_WORDS];
-        BigInteger res[];
+        int[] myN = new int[KEY_LENGTH_WORDS];
+        int[] myRr = new int[KEY_LENGTH_WORDS];
+        BigInteger[] res;
         for (int i = 0; i < KEY_LENGTH_WORDS; i++) {
             res = rr.divideAndRemainder(r32);
             rr = res[0];
@@ -236,7 +237,7 @@ public class AdbCrypto {
         keyString.append(" unknown@unknown");
         keyString.append('\0');
 
-        return keyString.toString().getBytes("UTF-8");
+        return keyString.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     /**

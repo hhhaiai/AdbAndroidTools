@@ -13,49 +13,42 @@ import java.util.HashMap;
  */
 public class AdbConnection implements Closeable {
 
+    protected volatile boolean isFine = true;
     AdbChannel channel;
-
     /**
      * The last allocated local stream ID. The ID
      * chosen for the next stream will be this value + 1.
      */
     private int lastLocalId;
-
     /**
      * The backend thread that handles responding to ADB packets.
      */
-    private Thread connectionThread;
-
+    private final Thread connectionThread;
     /**
      * Specifies whether a connect has been attempted
      */
     private boolean connectAttempted;
-
     /**
      * Specifies whether a CNXN packet has been received from the peer.
      */
     private boolean connected;
-
     /**
      * Specifies the maximum amount data that can be sent to the remote peer.
      * This is only valid after connect() returns successfully.
      */
     private int maxData;
-
     /**
      * An initialized ADB crypto object that contains a key pair.
      */
     private AdbCrypto crypto;
-
     /**
      * Specifies whether this connection has already sent a signed token.
      */
     private boolean sentSignature;
-
     /**
      * A hash map of our open streams indexed by local ID.
      **/
-    private HashMap<Integer, AdbStream> openStreams;
+    private final HashMap<Integer, AdbStream> openStreams;
 
     /**
      * Internal constructor to initialize some internal state
@@ -80,6 +73,18 @@ public class AdbConnection implements Closeable {
         newConn.crypto = crypto;
         newConn.channel = channel;
         return newConn;
+    }
+
+    public boolean isFine() {
+        return isFine && connectAttempted && connected;
+    }
+
+    public synchronized void setFine(boolean isFine) {
+        this.isFine = isFine;
+    }
+
+    public boolean isConnect() {
+        return connected;
     }
 
     /**
@@ -222,13 +227,23 @@ public class AdbConnection implements Closeable {
     }
 
     /**
+     * 无限等待
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void connect() throws IOException, InterruptedException {
+        connect(0L);
+    }
+
+    /**
      * Connects to the remote device. This routine will block until the connection
      * completes.
      *
+     * @param timeout
      * @throws IOException  If the socket fails while connecting
      * @throws InterruptedException If we are unable to wait for the connection to finish
      */
-    public void connect() throws IOException, InterruptedException {
+    public void connect(long timeout) throws IOException, InterruptedException {
         if (connected)
             throw new IllegalStateException("Already connected");
 
@@ -242,7 +257,7 @@ public class AdbConnection implements Closeable {
         /* Wait for the connection to go live */
         synchronized (this) {
             if (!connected)
-                wait();
+                wait(timeout);
 
             if (!connected) {
                 throw new IOException("Connection failed");
