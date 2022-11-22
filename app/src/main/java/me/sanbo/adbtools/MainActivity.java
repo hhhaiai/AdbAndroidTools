@@ -64,7 +64,6 @@ public class MainActivity extends Activity {
             //adb shell xxxx
             String res = AwesomeCommand.exec(shellCmd, 0);
 
-
             show("命令:" + shellCmd
                     + "\r\n执行结果:" + res);
         } else if (v.getId() == R.id.btnC) {

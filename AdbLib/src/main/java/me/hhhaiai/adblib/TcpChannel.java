@@ -1,4 +1,4 @@
-package me.hhhaiai;
+package me.hhhaiai.adblib;
 
 import me.hhhaiai.adblib.AdbChannel;
 import me.hhhaiai.adblib.AdbMessage;

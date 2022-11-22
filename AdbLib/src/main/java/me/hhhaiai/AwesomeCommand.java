@@ -10,6 +10,7 @@ import me.hhhaiai.adblib.AdbConnection;
 import me.hhhaiai.adblib.AdbCrypto;
 import me.hhhaiai.adblib.AdbStream;
 import me.hhhaiai.adblib.IAdbCallBack;
+import me.hhhaiai.adblib.TcpChannel;
 import me.hhhaiai.utils.Alog;
 import me.hhhaiai.utils.Pools;
 import me.hhhaiai.utils.Streams;
@@ -184,7 +185,7 @@ public class AwesomeCommand {
     public static ComponentName getTopinfo() {
         // 执行有问题
         String cmd = "dumpsys activity top | grep ACTIVITY";
-        String r = exec(cmd, 9);
+        String r = exec(cmd, 1);
         Alog.i("=============[" + r + "]");
 
         return null;
