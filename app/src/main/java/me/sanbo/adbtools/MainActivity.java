@@ -44,7 +44,14 @@ public class MainActivity extends Activity {
                     i("generateConnection result:" + res);
                 } else if (v.getId() == R.id.btnB) {
                     String res = Mys.execHighPrivilegeCmd("dumpsys window | grep mCurrentFocus");
-                    i("execHighPrivilegeCmd result:" + res);
+                    i("B result:" + res);
+
+                } else if (v.getId() == R.id.btnC) {
+                    String res = Mys.execHighPrivilegeCmd("dumpsys window w | grep name=");
+                    i("C result:" + res);
+                } else if (v.getId() == R.id.btnD) {
+                    String res = Mys.execHighPrivilegeCmd("dumpsys activity");
+                    i("D result:" + res);
                 }
             }
         }).start();

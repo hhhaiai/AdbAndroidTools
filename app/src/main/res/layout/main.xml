@@ -18,4 +18,16 @@
         android:layout_height="wrap_content"
         android:onClick="onClick"
         android:text="B" />
+    <Button
+        android:id="@+id/btnC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="C" />
+    <Button
+        android:id="@+id/btnD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="D" />
 </LinearLayout>
