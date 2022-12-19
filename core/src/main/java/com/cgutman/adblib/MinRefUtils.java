@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
+ * @原:https://github.com/LSPosed/AndroidHiddenApiBypass
  * 最小剪辑版黑灰名单避免方案.支持JDK 7、8编译的环境.
  * 用法使用一个接口方案: MinRefUtils.unseal(Context context)
  */
