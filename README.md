@@ -1,3 +1,3 @@
-#  adb android lib库
+# adb android lib库
 
-* adblibc基本调通
+* 基本调通
