@@ -63,5 +63,5 @@ tasks.withType(Javadoc) {
 }
 
 dependencies {
-implementation project(path: ':adblibC')
+    implementation project(path: ':core')
 }

@@ -23,7 +23,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class AdbMessageManager {
+class AdbMessageManager {
 
     /**
      * A hash map of our open streams indexed by local ID.
@@ -96,7 +96,8 @@ public class AdbMessageManager {
              * terminating cleanup for one failed close(). */
             try {
                 s.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
 
         /* No open streams anymore */

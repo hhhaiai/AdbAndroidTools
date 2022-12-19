@@ -39,7 +39,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author  ruikai.qrk
  * @see     java.io.ByteArrayInputStream
  */
-public
 class ByteQueueInputStream extends InputStream {
 
     private boolean isRunning;

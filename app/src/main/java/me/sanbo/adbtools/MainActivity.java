@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import uts.Mys;
+import com.cgutman.adblib.ADBCmd;
 
 public class MainActivity extends Activity {
 
@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if (v.getId() == R.id.btnA) {
-                    boolean res = Mys.context(MainActivity.this).generateConnection();
+                    boolean res = ADBCmd.context(MainActivity.this).generateConnection();
                     if (!res) {
                         runOnUiThread(new Runnable() {
                             @SuppressLint("NewApi")
@@ -43,15 +43,18 @@ public class MainActivity extends Activity {
                     }
                     i("generateConnection result:" + res);
                 } else if (v.getId() == R.id.btnB) {
-                    String res = Mys.execHighPrivilegeCmd("dumpsys window | grep mCurrentFocus");
+                    String res = ADBCmd.exec("dumpsys window | grep mCurrentFocus");
                     i("B result:" + res);
 
                 } else if (v.getId() == R.id.btnC) {
-                    String res = Mys.execHighPrivilegeCmd("dumpsys window w | grep name=");
+                    String res = ADBCmd.exec("dumpsys window w | grep name=");
                     i("C result:" + res);
                 } else if (v.getId() == R.id.btnD) {
-                    String res = Mys.execHighPrivilegeCmd("dumpsys activity");
+                    String res = ADBCmd.exec("dumpsys activity");
                     i("D result:" + res);
+                } else if (v.getId() == R.id.btnE) {
+
+                    i("context:" + ADBCmd.getContext());
                 }
             }
         }).start();

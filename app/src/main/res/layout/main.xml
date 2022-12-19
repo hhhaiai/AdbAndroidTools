@@ -30,4 +30,10 @@
         android:layout_height="wrap_content"
         android:onClick="onClick"
         android:text="D" />
+    <Button
+        android:id="@+id/btnE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="E" />
 </LinearLayout>

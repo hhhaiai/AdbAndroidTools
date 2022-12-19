@@ -48,8 +48,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AdbAndroidTools"
 include ':app'
-include ':adblibB'
-include ':adblibA'
-include ':adblibC'
-include ':One'
 include ':core'

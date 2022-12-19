@@ -1,25 +1,16 @@
-package uts;
+package com.cgutman.adblib;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Base64;
 import android.util.Log;
 
-import com.cgutman.adblib.AdbBase64;
-import com.cgutman.adblib.AdbConnection;
-import com.cgutman.adblib.AdbCrypto;
-import com.cgutman.adblib.AdbStream;
-
 import java.io.Closeable;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -29,9 +20,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Mys {
-    private static String TAG = "sanbo.Mys";
-    private static boolean isRoot = false;
+public class ADBCmd {
+    private static String TAG = "sanbo.ADBCmd";
     private static ExecutorService cachedExecutor = Executors.newCachedThreadPool();
     private static List<Process> processes = new ArrayList<>();
     private static volatile AdbConnection connection;
@@ -39,29 +29,20 @@ public class Mys {
 
     private static String mServer = "localhost:5555";
     private static Context mContext = null;
-//    public static String DEVICE_ID = null;
 
-    private static Mys mmm = new Mys();
+    private static ADBCmd cmds = new ADBCmd();
 
-    private Mys() {
+    private ADBCmd() {
     }
 
-    public static Mys context(Context context) {
+    public static ADBCmd context(Context context) {
         mContext = context;
-        return mmm;
+        return cmds;
     }
 
-    /**
-     * 运行高权限命令
-     * @param cmd
-     * @return
-     */
-    public static String execHighPrivilegeCmd(String cmd) {
-        // @todo check isRoot
-        if (isRoot) {
-            return execRootCmd(cmd, null, true, null).toString();
-        }
-        return execAdbCmd(cmd, 0);
+
+    public static String exec(final String cmd) {
+        return exec(cmd, 0);
     }
 
     /**
@@ -71,7 +52,7 @@ public class Mys {
      * @param wait 等待执行时间，0表示一直等待
      * @return 命令行输出
      */
-    public static String execAdbCmd(final String cmd, int wait) {
+    public static String exec(final String cmd, int wait) {
         // 主线程的话走Callable
         if (Looper.myLooper() == Looper.getMainLooper()) {
             if (wait > 5000 || wait == 0) {
@@ -113,7 +94,9 @@ public class Mys {
 
         try {
             AdbStream stream = connection.open("shell:" + cmd);
-            logcatCmd("__命令__" + stream.getLocalId() + "@" + "shell:" + cmd);
+            if (!cmd.contains("echo")) {
+                logcatCmd("__命令__" + stream.getLocalId() + "@" + "shell:" + cmd);
+            }
             streams.add(stream);
 
             // 当wait为0，每个10ms观察一次stream状况，直到shutdown
@@ -141,7 +124,9 @@ public class Mys {
                     sb.append(new String(bytes));
                 }
             }
-            logcatCmd("__结果__" + stream.getLocalId() + "@" + "shell:->" + sb.toString());
+            if (!cmd.contains("echo")) {
+                logcatCmd("__结果__" + stream.getLocalId() + "@" + "shell:->" + sb.toString());
+            }
             streams.remove(stream);
             return sb.toString();
         } catch (IllegalStateException e) {
@@ -165,6 +150,9 @@ public class Mys {
      * 生成Adb连接，由所在文件生成，或创建并保存到相应文件
      */
     public static boolean generateConnection() {
+        if (mContext == null) {
+            mContext = getContext();
+        }
         if (connection != null && connection.isFine()) {
             return true;
         }
@@ -312,12 +300,12 @@ public class Mys {
     private static int checkAdbStatus() {
         String result = null;
         try {
-            result = execAdbCmd("echo '1'", 5000);
+            result = exec("echo '1'", 5000);
         } catch (Exception e) {
             e(e);
         }
 
-        if (!StringUtil.trimEquals("1", result)) {
+        if (!trimEquals("1", result)) {
             // 等2s再检验一次
             SystemClock.sleep(2000);
 
@@ -326,11 +314,11 @@ public class Mys {
             // double check机制，防止单次偶然失败带来重连
             String doubleCheck = null;
             try {
-                doubleCheck = execAdbCmd("echo '1'", 5000);
+                doubleCheck = exec("echo '1'", 5000);
             } catch (Exception e) {
                 e(e);
             }
-            if (!StringUtil.trimEquals("1", doubleCheck)) {
+            if (!trimEquals("1", doubleCheck)) {
                 // 尝试恢复3次
                 for (int i = 0; i < 3; i++) {
                     // 关停无用连接
@@ -473,63 +461,6 @@ public class Mys {
     }
 
 
-    /*********************************************************************************************/
-    /************************************* root 方式执行shell指令******************************************/
-    /*********************************************************************************************/
-    /**
-     * 执行root命令
-     * @param cmd 待执行命令
-     * @param log 日志输出文件
-     * @param ret 是否保留命令行输出
-     * @param ct 上下文
-     * @return 输出
-     */
-    @SuppressWarnings("deprecation")
-    public static StringBuilder execRootCmd(String cmd, String log, Boolean ret, Context ct) {
-        StringBuilder result = new StringBuilder();
-        DataOutputStream dos = null;
-        DataInputStream dis = null;
-        DataInputStream des = null;
-        String line = null;
-        Process p;
-
-        try {
-            p = Runtime.getRuntime().exec("su");// 经过Root处理的android系统即有su命令
-            processes.add(p);
-            dos = new DataOutputStream(p.getOutputStream());
-            dis = new DataInputStream(p.getInputStream());
-            des = new DataInputStream(p.getErrorStream());
-
-//            while ((line = des.readLine()) != null) {
-//            		LogUtil.d(TAG, "ERR************" + line);
-//            }
-
-            i(cmd);
-            dos.writeBytes(cmd + "\n");
-            dos.flush();
-            dos.writeBytes("exit\n");
-            dos.flush();
-
-            while ((line = dis.readLine()) != null) {
-                if (log != null) {
-                    writeFileData(log, line, ct);
-                }
-                if (ret) {
-                    result.append(line).append("\n");
-                }
-            }
-            p.waitFor();
-            processes.remove(p);
-            isRoot = true;
-        } catch (Throwable e) {
-            e(e);
-            isRoot = false;
-        } finally {
-            close(dos, dis);
-        }
-        return result;
-    }
-
     private static void close(Object... objs) {
         if (objs == null || objs.length < 1) {
             return;
@@ -546,28 +477,6 @@ public class Mys {
     }
 
 
-
-
-    public static void writeFileData(String monkeyLog, String message, Context ct) {
-        String time = "";
-        try {
-            FileOutputStream fout = ct.openFileOutput(monkeyLog, Context.MODE_APPEND);
-
-            SimpleDateFormat formatter = new SimpleDateFormat("+++   HH:mm:ss");
-            Date curDate = new Date(System.currentTimeMillis());//获取当前时间
-            time = formatter.format(curDate);
-
-            byte[] bytes = message.getBytes();
-            fout.write(bytes);
-            bytes = (time + "\n").getBytes();
-            fout.write(bytes);
-            fout.close();
-        } catch (Exception e) {
-            e(e);
-        }
-
-
-    }
 
     private static void i(String cmd) {
         Log.i(TAG, cmd);
@@ -590,24 +499,50 @@ public class Mys {
     }
 
 
-//    public static Context getContext() {
-//        Object activityThread = RefMirror.on("android.app.ActivityThread").method("currentActivityThread").call();
-//        Object application = RefMirror.on(activityThread).method("getApplication").call();
-//
-//        if (application == null) {
-//            application = RefMirror.on("android.app.AppGlobals").method("getInitialApplication").call();
-//        }
-//        if (application != null) {
-//            return ((Application) application).getApplicationContext();
-//        }
-//        Object context = RefMirror.on(activityThread).method("getSystemContext").call();
-//        if (context == null) {
-//            context = RefMirror.on(activityThread).method("getSystemUiContext").call();
-//        }
-//        if (context != null) {
-//            return (Context) context;
-//        }
-//        return null;
-//    }
+    public static Context getContext() {
+        Object activityThread = MinRefUtils.call("android.app.ActivityThread", "currentActivityThread");
+        Object application = MinRefUtils.call(activityThread.getClass(), "getApplication", activityThread);
+
+        if (application == null) {
+            application = MinRefUtils.call("android.app.AppGlobals", "getInitialApplication");
+        }
+        if (application != null) {
+            return ((Application) application).getApplicationContext();
+        }
+        Object context = MinRefUtils.call(activityThread.getClass(), "getSystemContext", activityThread);
+        if (context == null) {
+            context = MinRefUtils.call(activityThread.getClass(), "getSystemUiContext", activityThread);
+        }
+        if (context != null) {
+            return (Context) context;
+        }
+        return null;
+    }
+
+    public static boolean trimEquals(CharSequence a, CharSequence b) {
+        a = trim(a);
+        b = trim(b);
+        // 两者都为空，相等
+        if (a == null && b == null) {
+            return true;
+        }
+
+        // 一个为空，不等
+        if (a == null || b == null) {
+            return false;
+        }
+
+        // 都不为空，直接比较
+        return a.toString().equals(b.toString());
+    }
+
+    /**
+     * 去除前后不可见符号
+     * @param origin
+     * @return
+     */
+    public static String trim(CharSequence origin) {
+        return origin == null ? null : origin.toString().trim();
+    }
 
 }
